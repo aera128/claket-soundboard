@@ -4,8 +4,7 @@
 
 ## Description
 
-Claket is a simple soundboard palette developed with [neutralinojs](https://github.com/neutralinojs/neutralinojs)
-, [Vue](https://github.com/vuejs/vue) and [Vuetify](https://github.com/vuetifyjs/vuetify)
+Claket is a simple soundboard palette developed with [Neutralinojs](https://github.com/neutralinojs/neutralinojs), [Vue](https://github.com/vuejs/vue) and [Vuetify](https://github.com/vuetifyjs/vuetify)
 
 ## Disclaimer
 
