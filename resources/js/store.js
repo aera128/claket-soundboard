@@ -201,7 +201,10 @@ const store = new Vuex.Store({
             audio.playback = audio.cloneNode()
             if (context.state.playback === false || context.state.audioOutput.deviceId === 'default') {
                 audio.playback.volume = 0
+            } else {
+                audio.playback.volume = context.state.volume
             }
+            audio.playback.loop = context.state.loop
             this.commit('addAudio', audio)
             audio.setSinkId(context.state.audioOutput.deviceId).then(() => {
                 audio.play()
