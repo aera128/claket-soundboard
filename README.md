@@ -1,12 +1,18 @@
 # Claket
 
 ![screenshot](resources/icons/logo-without-letters.svg)
+
 ## Description
-Claket is a simple soundboard palette developed with [neutralinojs](https://github.com/neutralinojs/neutralinojs) 
+
+Claket is a simple soundboard palette developed with [neutralinojs](https://github.com/neutralinojs/neutralinojs)
+, [Vue](https://github.com/vuejs/vue) and [Vuetify](https://github.com/vuetifyjs/vuetify)
 
 ## Disclaimer
+
 Not tested on Mac and Linux, it probably doesn't work
+
 ## Features
+
 - Sound :
     - Add
     - Delete
@@ -15,7 +21,7 @@ Not tested on Mac and Linux, it probably doesn't work
     - Stop
     - Toggle Loop
 - Playback :
-    - Active 
+    - Active
     - Desactive
 - Volume
 - Pages :
@@ -24,6 +30,9 @@ Not tested on Mac and Linux, it probably doesn't work
 - Choose Audio Output
 
 ## Download
+
 Download from [Releases](https://github.com/aera128/claket-soundboard/releases)
+
 ## Screenshot
+
 ![screenshot](screenshot.png)
