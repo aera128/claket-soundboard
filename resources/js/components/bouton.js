@@ -25,7 +25,11 @@ Vue.component('button-soundboard', {
         },
         addSound() {
             if (![null, undefined].includes(this.file)) {
-                this.$store.commit('addSound', {file: this.file, index: this.index})
+                if (this.file.size > 40960000) {
+                    EventBus.$emit('notif', {message: '40MB max', type: 'error'})
+                } else {
+                    this.$store.commit('addSound', {file: this.file, index: this.index})
+                }
             }
             this.file = null
         },
@@ -44,7 +48,7 @@ Vue.component('button-soundboard', {
     template: `
       <div v-if="sound !== null && sound !== undefined">
       <v-lazy @click.right="openMenu" transition="fab-transition">
-        <v-sheet height="200" elevation="2" rounded="xl"
+        <v-sheet height="175" elevation="2" rounded="xl"
                  @click="playSound(sound)"
                  color="grey darken-3"
                  block
@@ -68,7 +72,7 @@ Vue.component('button-soundboard', {
         </v-sheet>
       </v-lazy>
       <v-lazy transition="fab-transition">
-        <v-btn height="200" elevation="2" rounded
+        <v-btn height="175" elevation="2" rounded
                @click.right="closeMenu" ref="rightMenu"
                @click.left="deleteSound"
                color="grey darken-3"
@@ -82,7 +86,7 @@ Vue.component('button-soundboard', {
       <div v-else>
       <v-file-input type="file" ref="file" style="display: none" v-model="file"
                     @change="addSound" accept="audio/*"></v-file-input>
-      <v-btn height="200" elevation="2" rounded
+      <v-btn height="175" elevation="2" rounded
              @click="$refs.file.$refs.input.click()"
              block
       >

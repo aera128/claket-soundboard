@@ -2,12 +2,12 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="fonts/roboto.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <link href="css/vuetify.min.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     <title>NeutralinoJs</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 <div id="app">
@@ -46,16 +46,64 @@
                         </v-btn>
                         <v-btn fab color="grey darken-3" :disabled="$store.state.audios.length === 0"
                                @click="stopAll"
+                               class="mr-1"
                         >
                             <v-icon>mdi-stop</v-icon>
                         </v-btn>
+                        <v-tooltip bottom v-if="$store.state.loop === false">
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-btn fab color="grey darken-3"
+                                       @click="activeLoop" v-bind="attrs" v-on="on"
+                                >
+                                    <v-icon>mdi-sync-off</v-icon>
+                                </v-btn>
+                            </template>
+                            <span>Loop</span>
+                        </v-tooltip>
+                        <v-tooltip bottom v-else>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-btn fab color="grey darken-3"
+                                       @click="desactiveLoop" v-bind="attrs" v-on="on"
+                                >
+                                    <v-icon>mdi-sync</v-icon>
+                                </v-btn>
+                            </template>
+                            <span>Loop</span>
+                        </v-tooltip>
                     </v-col>
                     <v-col class="ml-auto text-right">
-                        <v-btn fab color="grey darken-3"
-                               @click="deletePage"
-                        >
-                            <v-icon>mdi-delete</v-icon>
-                        </v-btn>
+                        <v-tooltip bottom v-if="$store.state.playback === true">
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-btn fab color="grey darken-3"
+                                       class="mr-1"
+                                       @click="desactivePlayback" v-bind="attrs" v-on="on"
+                                >
+                                    <v-icon>mdi-speaker</v-icon>
+                                </v-btn>
+                            </template>
+                            <span>Playback</span>
+                        </v-tooltip>
+                        <v-tooltip bottom v-else>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-btn fab color="grey darken-3"
+                                       class="mr-1"
+                                       @click="activePlayback" v-bind="attrs" v-on="on"
+                                >
+                                    <v-icon>mdi-speaker-off</v-icon>
+                                </v-btn>
+                            </template>
+                            <span>Playback</span>
+                        </v-tooltip>
+                        <v-tooltip bottom>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-btn fab color="grey darken-3"
+                                       @click="deletePage" v-bind="attrs" v-on="on"
+                                >
+                                    <v-icon>mdi-delete</v-icon>
+                                </v-btn>
+                            </template>
+                            <span>Reset Page</span>
+                        </v-tooltip>
                     </v-col>
                 </v-row>
                 <v-row class="mb-10">
@@ -77,6 +125,7 @@
                         size="64"
                 ></v-progress-circular>
             </v-overlay>
+            <small><i>v{{ NL_version }}</i></small>
         </v-main>
         <v-footer fixed v-if="$store.state.audios.length > 0">
             <v-col
@@ -90,6 +139,7 @@
                 </v-list>
             </v-col>
         </v-footer>
+        <notification-soundboard></notification-soundboard>
     </v-app>
 </div>
 <!-- Neutralino.js client. This file is gitignored,
@@ -98,241 +148,16 @@
     -->
 <script src="js/neutralino.js"></script>
 <!-- Your app's source files -->
-<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
-<script src="https://unpkg.com/vuex@3.6.2/dist/vuex.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script src="js/vue.min.js"></script>
+<script src="js/vuex.min.js"></script>
+<script src="js/vuetify.min.js"></script>
 <script src="js/main.js"></script>
-<script src="js/device.js"></script>
-<script src="js/bouton.js"></script>
-<script src="js/volume.js"></script>
-<script src="js/player.js"></script>
-<script>
-    function _arrayBufferToBase64(buffer) {
-        let binary = '';
-        let bytes = new Uint8Array(buffer);
-        let len = bytes.byteLength;
-        for (let i = 0; i < len; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        return window.btoa(binary);
-    }
-
-    function _base64ToArrayBuffer(base64) {
-        let binary_string = window.atob(base64);
-        let len = binary_string.length;
-        let bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-            bytes[i] = binary_string.charCodeAt(i);
-        }
-        return bytes.buffer;
-    }
-
-    Vue.use(Vuex)
-
-
-    const store = new Vuex.Store({
-        state: {
-            pages: [],
-            audios: [],
-            audioOutputs: [],
-            audioOutput: null,
-            volume: 0.5,
-            page: 1,
-            paused: false
-        },
-        mutations: {
-            addSound(state, sound) {
-                EventBus.$emit('loading')
-                sound.file.arrayBuffer().then(b => {
-                        let data = _arrayBufferToBase64(b)
-                        let file = {
-                            name: sound.file.name,
-                            type: sound.file.type,
-                            index: sound.index,
-                            data: data
-                        }
-                        if (state.pages[state.page] === undefined) {
-                            state.pages[state.page] = []
-                        }
-                        state.pages[state.page].push(file)
-                        EventBus.$emit('refreshButton')
-                        Neutralino.storage.putData({
-                            bucket: 'soundboard-sounds',
-                            data: JSON.stringify(state.pages)
-                        });
-                        EventBus.$emit('loaded')
-                    }
-                )
-            },
-            deleteSound(state, sound) {
-                state.pages[state.page] = state.pages[state.page].filter(f => f !== sound)
-                EventBus.$emit('refreshButton')
-                Neutralino.storage.putData({
-                    bucket: 'soundboard-sounds',
-                    data: JSON.stringify(state.pages)
-                });
-            },
-            setPages(state, pages) {
-                state.pages = pages
-            },
-            setPage(state, page) {
-                state.page = page
-                EventBus.$emit('refreshData')
-            },
-            addAudio(state, audio) {
-                state.audios.push(audio)
-            },
-            removeAudio(state, audio) {
-                state.audios = state.audios.filter(a => a !== audio)
-            },
-            setAudioOutputs(state, outputs) {
-                state.audioOutputs = outputs
-            },
-            setAudioOutput(state, output) {
-                state.audioOutput = output
-                Neutralino.storage.putData({
-                    bucket: 'output-device',
-                    data: JSON.stringify(output)
-                });
-            },
-            setVolume(state, volume) {
-                state.volume = volume
-                state.audios.map(a => a.volume = volume)
-            },
-            deletePage(state){
-                state.pages[state.page] = []
-                EventBus.$emit('refreshButton')
-                Neutralino.storage.putData({
-                    bucket: 'soundboard-sounds',
-                    data: JSON.stringify(state.pages)
-                });
-            }
-        },
-        actions: {
-            playSound(context, sound) {
-                let buffer = _base64ToArrayBuffer(sound.data)
-                const blob = new Blob([buffer], {type: sound.type});
-                const url = window.URL.createObjectURL(blob);
-                // Create an audio element
-                const audio = new Audio();
-
-                // Clean up the URL Object after we are done with it
-                audio.addEventListener("load", () => {
-                    URL.revokeObjectURL(url);
-                });
-
-                let store = this
-                audio.addEventListener("ended", () => {
-                    store.commit('removeAudio', audio)
-                });
-
-                // Set the src and start loading the audio from the file
-                audio.src = url;
-                audio.volume = context.state.volume
-                audio.name = sound.name
-                this.commit('addAudio', audio)
-                audio.setSinkId(context.state.audioOutput.deviceId).then(() => {
-                    audio.play()
-                    context.state.paused = false
-                })
-            },
-            stopAll(context) {
-                context.state.audios.map(audio => {
-                    try {
-                        audio.pause()
-                        audio.currentTime = audio.duration
-                        context.commit('removeAudio', audio)
-                    } catch (e) {
-                    }
-                })
-            },
-            pauseAll(context) {
-                context.state.audios.map(audio => {
-                    try {
-                        audio.pause()
-                    } catch (e) {
-                    }
-                })
-                context.state.paused = true
-            },
-            resumeAll(context) {
-                context.state.audios.map(audio => {
-                    try {
-                        audio.play()
-                    } catch (e) {
-                    }
-                })
-                context.state.paused = false
-            }
-        }
-    })
-    new Vue({
-        el: '#app',
-        store: store,
-        vuetify: new Vuetify({
-            theme: {dark: true},
-        }),
-        data: () => {
-            return {
-                page: 1,
-                loading: true
-            }
-        },
-        mounted() {
-            this.getData()
-            EventBus.$on('refreshData', () => {
-                this.getData()
-            })
-            EventBus.$on('loaded', () => {
-                this.loading = false
-            })
-            EventBus.$on('loading', () => {
-                this.loading = true
-            })
-        },
-        methods: {
-            deletePage() {
-                if (confirm('Supprimer la page ?')){
-                    this.$store.commit('deletePage')
-                }
-            },
-            stopAll() {
-                this.$store.dispatch('stopAll')
-            },
-            pauseAll() {
-                this.$store.dispatch('pauseAll')
-            },
-            resumeALl() {
-                this.$store.dispatch('resumeAll')
-            },
-            changePage() {
-                if (this.page < 1) {
-                    this.page = 1
-                }
-                if (this.page > 1000) {
-                    this.page = 1000
-                }
-                this.$store.commit('setPage', this.page)
-            },
-            async getData() {
-                this.loading = true
-                Neutralino.storage.getData({
-                    bucket: 'soundboard-sounds'
-                }).then(r => {
-                    let pages = JSON.parse(r.data)
-                    if (pages !== null) {
-                        this.$store.commit('setPages', pages)
-                    }
-                    EventBus.$emit('refreshButton')
-                    this.loading = false
-                }).catch(() => {
-                    EventBus.$emit('refreshButton')
-                    this.loading = false
-                });
-            }
-        },
-        watch: {}
-    })
-</script>
+<script src="js/store.js"></script>
+<script src="js/components/device.js"></script>
+<script src="js/components/bouton.js"></script>
+<script src="js/components/volume.js"></script>
+<script src="js/components/player.js"></script>
+<script src="js/components/notification.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

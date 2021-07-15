@@ -26,6 +26,6 @@ Neutralino.events = {
 
 const EventBus = new Vue()
 Neutralino.init();
-window.myApp.setTray();
+// window.myApp.setTray();
 
 

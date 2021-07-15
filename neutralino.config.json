@@ -6,7 +6,9 @@
   "enableNativeAPI": true,
   "url": "/resources/",
   "nativeBlockList": [],
-  "globalVariables": {},
+  "globalVariables": {
+    "version": "0.0.2"
+  },
   "modes": {
     "window": {
       "title": "Claket",
