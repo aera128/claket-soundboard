@@ -3,18 +3,27 @@ Vue.component('player-soundboard', {
     data: function () {
         return {
             paused: false,
-            currentTime: null,
-            duration: null,
+            currentTime: 0,
+            duration: 0,
             click: false,
             clickWhilePlaying: false,
         }
     },
     mounted() {
         let vm = this
-        this.audio.addEventListener('timeupdate', () => {
+        EventBus.$on('pause', () => {
+            this.paused = true
+        })
+        EventBus.$on('play', () => {
+            this.paused = false
+        })
+        this.interval = setInterval(function () {
             vm.currentTime = vm.audio.currentTime
             vm.duration = vm.audio.duration
-        })
+        }, 50);
+    },
+    destroyed() {
+        clearInterval(this.interval)
     },
     methods: {
         toggleAudio() {
@@ -62,16 +71,15 @@ Vue.component('player-soundboard', {
         }
     },
     template: `
-      <div style="width: 100%">
+      <div style="width: 100%" class="mb-3"
+      >
       <v-slider
           v-model="currentTime"
           :value="currentTime"
-          :hint="audio.name"
-          persistent-hint
           @mouseup="mouseUp"
           @mousedown="mouseDown"
           @input="changeCurrentTime"
-          step="0.001"
+          step="0.00001"
           :max="duration"
           :min="0"
       >
@@ -87,6 +95,9 @@ Vue.component('player-soundboard', {
           </v-btn>
         </template>
       </v-slider>
+      <div class="player-name text--secondary">
+        {{ audio.name + ' : ' + formatTime(currentTime) + ' /  ' + formatTime(duration) + '' }}
+      </div>
       </div>
     `
 })

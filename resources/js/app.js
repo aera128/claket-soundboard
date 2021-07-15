@@ -1,23 +1,3 @@
-function _arrayBufferToBase64(buffer) {
-    let binary = '';
-    let bytes = new Uint8Array(buffer);
-    let len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return window.btoa(binary);
-}
-
-function _base64ToArrayBuffer(base64) {
-    let binary_string = window.atob(base64);
-    let len = binary_string.length;
-    let bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-        bytes[i] = binary_string.charCodeAt(i);
-    }
-    return bytes.buffer;
-}
-
 new Vue({
     el: '#app',
     store: store,
@@ -27,7 +7,8 @@ new Vue({
     data: () => {
         return {
             page: 1,
-            loading: true
+            loading: true,
+            showlist: false
         }
     },
     mounted() {
@@ -44,6 +25,9 @@ new Vue({
         })
     },
     methods: {
+        toggleList() {
+            this.showlist = !this.showlist
+        },
         deletePage() {
             if (confirm('Supprimer la page ?')) {
                 this.$store.commit('deletePage')

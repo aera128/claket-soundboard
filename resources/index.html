@@ -122,8 +122,9 @@
             <v-overlay :value="loading" :opacity="0.9">
                 <v-progress-circular
                         indeterminate
-                        size="64"
-                ></v-progress-circular>
+                        size="200"
+                > Loading
+                </v-progress-circular>
             </v-overlay>
             <small><i>v{{ NL_version }}</i></small>
         </v-main>
@@ -131,11 +132,36 @@
             <v-col
                     cols="12"
             >
-                <v-list color="transparent">
-                    <v-list-item v-for="audio in $store.state.audios">
-                        <player-soundboard :audio="audio"></player-soundboard>
-                        <v-divider></v-divider>
-                    </v-list-item>
+                <v-list outlined style="max-height: 60vh" rounded="xl"
+                        class="overflow-y-auto">
+                    <v-lazy transition="scroll-x-transition">
+                        <v-list-item>
+                            <v-list-item-content>
+                                <v-list-item-title>
+                                    <player-soundboard :audio="$store.state.audios[0]"></player-soundboard>
+                                </v-list-item-title>
+                            </v-list-item-content>
+                            <v-list-item-action v-if="$store.state.audios.length > 1">
+                                <v-btn fab small color="grey darken-3" @click="toggleList">
+                                    <v-icon v-if="!showlist">mdi-chevron-up</v-icon>
+                                    <v-icon v-else>mdi-chevron-down</v-icon>
+                                </v-btn>
+                            </v-list-item-action>
+                        </v-list-item>
+                    </v-lazy>
+                    <v-lazy v-for="(audio, i) in $store.state.audios" :key="i"
+                            v-if="$store.state.audios.length > 1 && showlist"
+                            transition="scroll-x-transition"
+                    >
+                        <v-list-item>
+                            <v-list-item-content>
+                                <v-list-item-title>
+                                    <player-soundboard :audio="audio" v-if="i > 0"></player-soundboard>
+
+                                </v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-lazy>
                 </v-list>
             </v-col>
         </v-footer>

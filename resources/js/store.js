@@ -27,17 +27,18 @@ const store = new Vuex.Store({
                         state.pages[state.page] = []
                     }
                     state.pages[state.page].push(file)
-                    EventBus.$emit('refreshButton')
                     Neutralino.storage.putData({
                         bucket: 'soundboard-sounds',
                         data: JSON.stringify(state.pages)
                     })
                         .then(() => {
+                                EventBus.$emit('refreshButton')
                                 EventBus.$emit('loaded')
                                 EventBus.$emit('notif', {message: 'Sound loaded', type: 'success'})
                             }
                         )
                         .catch(() => {
+                                EventBus.$emit('refreshButton')
                                 EventBus.$emit('loaded')
                                 EventBus.$emit('notif', {message: 'Error', type: 'error'})
                             }
@@ -46,6 +47,7 @@ const store = new Vuex.Store({
             )
         },
         deleteSound(state, sound) {
+            EventBus.$emit('loading')
             state.pages[state.page] = state.pages[state.page].filter(f => f !== sound)
             EventBus.$emit('refreshButton')
             Neutralino.storage.putData({
@@ -54,10 +56,12 @@ const store = new Vuex.Store({
             })
                 .then(() => {
                     sound = null
+                    EventBus.$emit('loaded')
                     EventBus.$emit('notif', {message: 'Sound deleted', type: 'success'})
                 })
                 .catch(() => {
                     sound = null
+                    EventBus.$emit('loaded')
                     EventBus.$emit('notif', {message: 'Error', type: 'error'})
                 });
         },
@@ -66,13 +70,13 @@ const store = new Vuex.Store({
         },
         setPage(state, page) {
             state.page = page
-            EventBus.$emit('refreshData')
+            EventBus.$emit('refreshButton')
         },
         addAudio(state, audio) {
-            state.audios.push(audio)
+            state.audios.unshift(audio)
         },
         removeAudio(state, audio) {
-            state.audios = state.audios.filter(a => a !== audio)
+            state.audios = state.audios.filter(a => a.uid !== audio.uid)
             audio = null
         },
         setAudioOutputs(state, outputs) {
@@ -197,6 +201,7 @@ const store = new Vuex.Store({
             audio.volume = context.state.volume
             audio.name = sound.name
             audio.loop = context.state.loop
+            audio.uid = guidGenerator()
 
             audio.playback = audio.cloneNode()
             if (context.state.playback === false || context.state.audioOutput.deviceId === 'default') {
@@ -232,6 +237,7 @@ const store = new Vuex.Store({
                 }
             })
             context.state.paused = true
+            EventBus.$emit('pause')
         },
         resumeAll(context) {
             context.state.audios.map(audio => {
@@ -242,6 +248,7 @@ const store = new Vuex.Store({
                 }
             })
             context.state.paused = false
+            EventBus.$emit('play')
         }
     }
 })
