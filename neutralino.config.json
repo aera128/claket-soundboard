@@ -1,0 +1,34 @@
+{
+  "applicationId": "com.aera128.claket",
+  "port": 0,
+  "defaultMode": "window",
+  "enableHTTPServer": true,
+  "enableNativeAPI": true,
+  "url": "/resources/",
+  "nativeBlockList": [],
+  "globalVariables": {},
+  "modes": {
+    "window": {
+      "title": "Claket",
+      "width": 1280,
+      "height": 720,
+      "minWidth": 400,
+      "minHeight": 500,
+      "fullScreen": false,
+      "alwaysOnTop": false,
+      "icon": "/resources/icons/logo.png",
+      "enableInspector": false,
+      "borderless": false,
+      "maximize": false
+    },
+    "browser": {},
+    "cloud": {}
+  },
+  "cli": {
+    "binaryName": "claket",
+    "resourcesPath": "/resources/",
+    "clientLibrary": "/resources/js/neutralino.js",
+    "binaryVersion": "2.4.1",
+    "clientVersion": "1.0.0"
+  }
+}

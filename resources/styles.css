@@ -1,0 +1,25 @@
+.bouton {
+    /**Major Properties**/
+    overflow: hidden;
+    line-height: 1.5rem;
+    max-height: calc(1.5rem * 5);
+    -webkit-box-orient: vertical;
+    display: block;
+    display: -webkit-box;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 5;
+}
+
+body::-webkit-scrollbar {
+    width: 5px;
+}
+
+body::-webkit-scrollbar-thumb {
+    background-color: #7a7a7a;
+    outline: 1px solid #7a7a7a;
+}
+
+body::-webkit-scrollbar-track{
+    background-color: #121212;
+}
