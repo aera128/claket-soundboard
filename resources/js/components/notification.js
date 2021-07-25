@@ -17,10 +17,10 @@ Vue.component('notification-soundboard', {
     template: `
       <v-snackbar
           dark
-          transition="slide-y-transition"
+          transition="slide-y-reverse-transition"
           v-model="snackbar"
-          top
-          left
+          bottom
+          right
           timeout="2000"
           :color="type + ' darken-1'"
       >

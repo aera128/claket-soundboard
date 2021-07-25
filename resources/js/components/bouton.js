@@ -44,6 +44,9 @@ Vue.component('button-soundboard', {
             this.viewMenu = false
             e.preventDefault();
         },
+        changeCoef() {
+            this.$store.commit('changeCoef', this.sound, this.sound.coef)
+        }
     },
     template: `
       <div v-if="sound !== null && sound !== undefined">
@@ -71,15 +74,49 @@ Vue.component('button-soundboard', {
           </v-container>
         </v-sheet>
       </v-lazy>
-      <v-lazy transition="fab-transition">
-        <v-btn height="175" elevation="2" rounded
-               @click.right="closeMenu" ref="rightMenu"
-               @click.left="deleteSound"
-               color="grey darken-3"
+      <v-lazy transition="scroll-y-reverse-transition">
+        <v-btn height="50" elevation="2" rounded
+               style="margin-bottom: 12px"
+               @click="deleteSound"
+               color="red darken-3"
                v-if="sound.name !== undefined && viewMenu"
                block
         >
-          <v-icon class="text-h3">mdi-delete</v-icon>
+          <v-icon class="text-h4">mdi-delete</v-icon>
+        </v-btn>
+      </v-lazy>
+      <v-lazy transition="scroll-y-reverse-transition">
+        <v-sheet height="50" elevation="2" rounded="xl"
+                 style="margin-bottom: 12px"
+                 color="grey darken-3"
+                 v-if="sound.name !== undefined && viewMenu"
+        >
+          <v-container>
+            <v-row>
+              <v-col>
+                <v-slider v-model="sound.coef" :value="sound.coef" class="mt-n1" step="0.001" :min="0" :max="1"
+                          @change="changeCoef">
+                  <template v-slot:thumb-label="{ value }">
+                    {{ (value * 100).toFixed(0) + '%' }}
+                  </template>
+                  <template v-slot:prepend>
+                    <v-icon>mdi-volume-high</v-icon>
+                  </template>
+                </v-slider>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-sheet>
+      </v-lazy>
+      <v-lazy transition="scroll-y-reverse-transition">
+        <v-btn height="50" elevation="2" rounded
+               @click="closeMenu" ref="rightMenu"
+               color="grey darken-3"
+               class="red--text"
+               v-if="sound.name !== undefined && viewMenu"
+               block
+        >
+          Close
         </v-btn>
       </v-lazy>
       </div>
@@ -98,5 +135,14 @@ Vue.component('button-soundboard', {
         ></v-progress-circular>
       </v-btn>
       </div>
-    `
+      <script>
+      import VSlider from "./vuetify.min";
+      import VContainer from "./vuetify.min";
+      import VRow from "./vuetify.min";
+      import VCol from "./vuetify.min";
+
+      export default {
+        components: {VCol, VRow, VContainer, VSlider}
+      }
+      </script>`
 })

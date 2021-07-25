@@ -52,6 +52,7 @@ Vue.component('player-soundboard', {
                 this.paused = false
                 this.clickWhilePlaying = false
             }
+            this.changeCurrentTime()
         },
         mouseDown() {
             this.click = true
@@ -61,6 +62,7 @@ Vue.component('player-soundboard', {
                 this.paused = true
                 this.clickWhilePlaying = true
             }
+            this.changeCurrentTime()
         },
         changeCurrentTime() {
             if (this.click) {

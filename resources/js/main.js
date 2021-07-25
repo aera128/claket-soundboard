@@ -59,6 +59,20 @@ Neutralino.events = {
     }
 };
 
+document.onkeydown = function (e) {
+    return !(e.ctrlKey &&
+        (e.keyCode === 65 ||
+            e.keyCode === 67 ||
+            e.keyCode === 80 ||
+            e.keyCode === 86 ||
+            e.keyCode === 85 ||
+            e.keyCode === 87 ||
+            e.keyCode === 70 ||
+            e.keyCode === 117));
+};
+
+document.addEventListener('contextmenu', event => event.preventDefault());
+
 const EventBus = new Vue()
 Neutralino.init();
 // window.myApp.setTray();

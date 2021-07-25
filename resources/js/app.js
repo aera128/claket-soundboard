@@ -63,6 +63,14 @@ new Vue({
             }
             this.$store.commit('setPage', this.page)
         },
+        nextPage() {
+            this.page++
+            this.changePage()
+        },
+        previousPage() {
+            this.page--
+            this.changePage()
+        },
         async getData() {
             this.loading = true
             Neutralino.storage.getData({

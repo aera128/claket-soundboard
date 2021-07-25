@@ -11,16 +11,22 @@ const store = new Vuex.Store({
         paused: false,
         loop: false,
         playback: true,
+        gotDevices: false
     },
     mutations: {
+        gotDevices(state) {
+            state.gotDevices = true
+        },
         addSound(state, sound) {
             EventBus.$emit('loading')
             sound.file.arrayBuffer().then(b => {
                     let data = _arrayBufferToBase64(b)
                     let file = {
+                        id: guidGenerator(),
                         name: sound.file.name,
                         type: sound.file.type,
                         index: sound.index,
+                        coef: 1,
                         data: data
                     }
                     if (state.pages[state.page] === undefined) {
@@ -46,10 +52,33 @@ const store = new Vuex.Store({
                 }
             )
         },
+        changeCoef(state, sound, coef) {
+            try {
+                // state.pages[state.page].filter(f => f === sound)[0].coef = coef
+                Neutralino.storage.putData({
+                    bucket: 'soundboard-sounds',
+                    data: JSON.stringify(state.pages)
+                })
+                    .then(() => {
+                        }
+                    )
+                    .catch(() => {
+                        }
+                    );
+                state.audios.forEach(audio => {
+                    if (audio.sound.id === sound.id) {
+                        audio.volume = state.volume * audio.sound.coef
+                        if (state.playback === true) {
+                            audio.playback.volume = state.volume * audio.sound.coef
+                        }
+                    }
+                })
+            } catch (e) {
+            }
+        },
         deleteSound(state, sound) {
             EventBus.$emit('loading')
             state.pages[state.page] = state.pages[state.page].filter(f => f !== sound)
-            EventBus.$emit('refreshButton')
             Neutralino.storage.putData({
                 bucket: 'soundboard-sounds',
                 data: JSON.stringify(state.pages)
@@ -57,11 +86,13 @@ const store = new Vuex.Store({
                 .then(() => {
                     sound = null
                     EventBus.$emit('loaded')
+                    EventBus.$emit('refreshButton')
                     EventBus.$emit('notif', {message: 'Sound deleted', type: 'success'})
                 })
                 .catch(() => {
                     sound = null
                     EventBus.$emit('loaded')
+                    EventBus.$emit('refreshButton')
                     EventBus.$emit('notif', {message: 'Error', type: 'error'})
                 });
         },
@@ -77,6 +108,8 @@ const store = new Vuex.Store({
         },
         removeAudio(state, audio) {
             state.audios = state.audios.filter(a => a.uid !== audio.uid)
+            URL.revokeObjectURL(audio.url);
+            audio.playback = null
             audio = null
         },
         setAudioOutputs(state, outputs) {
@@ -91,10 +124,10 @@ const store = new Vuex.Store({
         },
         setVolume(state, volume) {
             state.volume = volume
-            state.audios.map(a => {
+            state.audios.forEach(a => {
                 a.volume = volume
                 if (state.playback === true) {
-                    a.playback.volume = volume
+                    a.playback.volume = volume * audio.sound.coef
                 }
             })
         },
@@ -116,7 +149,7 @@ const store = new Vuex.Store({
         },
         activeLoop(state) {
             state.loop = true
-            state.audios.map(audio => {
+            state.audios.forEach(audio => {
                 try {
                     audio.loop = state.loop
                     audio.playback.loop = state.loop
@@ -126,7 +159,7 @@ const store = new Vuex.Store({
         },
         desactiveLoop(state) {
             state.loop = false
-            state.audios.map(audio => {
+            state.audios.forEach(audio => {
                 try {
                     audio.loop = state.loop
                     audio.playback.loop = state.loop
@@ -136,9 +169,9 @@ const store = new Vuex.Store({
         },
         activePlayback(state) {
             state.playback = true
-            state.audios.map(audio => {
+            state.audios.forEach(audio => {
                 try {
-                    audio.playback.volume = state.volume
+                    audio.playback.volume = state.volume * audio.sound.coef
                 } catch (e) {
                 }
             })
@@ -149,7 +182,7 @@ const store = new Vuex.Store({
         },
         desactivePlayback(state) {
             state.playback = false
-            state.audios.map(audio => {
+            state.audios.forEach(audio => {
                 try {
                     audio.playback.volume = 0
                 } catch (e) {
@@ -163,14 +196,14 @@ const store = new Vuex.Store({
         setPlayback(state, playback) {
             state.playback = playback
             if (playback === true) {
-                state.audios.map(audio => {
+                state.audios.forEach(audio => {
                     try {
-                        audio.playback.volume = state.volume
+                        audio.playback.volume = state.volume * audio.sound.coef
                     } catch (e) {
                     }
                 })
             } else {
-                state.audios.map(audio => {
+                state.audios.forEach(audio => {
                     try {
                         audio.playback.volume = 0
                     } catch (e) {
@@ -196,9 +229,12 @@ const store = new Vuex.Store({
             audio.addEventListener("ended", () => {
                 store.commit('removeAudio', audio)
             });
-
+            if (sound.coef === undefined) {
+                sound.coef = 1
+            }
             audio.src = url;
-            audio.volume = context.state.volume
+            audio.sound = sound
+            audio.volume = context.state.volume * sound.coef
             audio.name = sound.name
             audio.loop = context.state.loop
             audio.uid = guidGenerator()
@@ -207,7 +243,7 @@ const store = new Vuex.Store({
             if (context.state.playback === false || context.state.audioOutput.deviceId === 'default') {
                 audio.playback.volume = 0
             } else {
-                audio.playback.volume = context.state.volume
+                audio.playback.volume = context.state.volume * sound.coef
             }
             audio.playback.loop = context.state.loop
             this.commit('addAudio', audio)
@@ -218,7 +254,7 @@ const store = new Vuex.Store({
             })
         },
         stopAll(context) {
-            context.state.audios.map(audio => {
+            context.state.audios.forEach(audio => {
                 try {
                     audio.pause()
                     audio.playback.pause()
@@ -229,7 +265,7 @@ const store = new Vuex.Store({
             })
         },
         pauseAll(context) {
-            context.state.audios.map(audio => {
+            context.state.audios.forEach(audio => {
                 try {
                     audio.pause()
                     audio.playback.pause()
@@ -240,7 +276,7 @@ const store = new Vuex.Store({
             EventBus.$emit('pause')
         },
         resumeAll(context) {
-            context.state.audios.map(audio => {
+            context.state.audios.forEach(audio => {
                 try {
                     audio.play()
                     audio.playback.play()

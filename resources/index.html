@@ -21,8 +21,8 @@
                     <v-col col="12" sm="6">
                         <device-soundboard></device-soundboard>
                         <v-text-field type="number" outlined label="Page" v-model="page" min="1" max="1000"
-                                      @input="changePage" class="mt-sm-0 mt-n10" :value="page"></v-text-field>
-                        <volume-soundboard class="mt-sm-3 mt-n10"></volume-soundboard>
+                                      @input="changePage" class="mt-sm-0 mt-n3" :value="page"></v-text-field>
+                        <volume-soundboard class="mt-sm-3 mt-n3"></volume-soundboard>
 
                     </v-col>
                 </v-row>
@@ -72,10 +72,32 @@
                         </v-tooltip>
                     </v-col>
                     <v-col class="ml-auto text-right">
+                        <v-tooltip bottom>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-btn fab color="grey darken-3"
+                                       @click="previousPage" v-bind="attrs" v-on="on"
+                                       :disabled="page === 1"
+                                >
+                                    <v-icon>mdi-arrow-left-bold-outline</v-icon>
+                                </v-btn>
+                            </template>
+                            <span>Previous Page</span>
+                        </v-tooltip>
+                        <v-tooltip bottom>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-btn fab color="grey darken-3 ml-1"
+                                       @click="nextPage" v-bind="attrs" v-on="on"
+                                       :disabled="page === 1000"
+                                >
+                                    <v-icon>mdi-arrow-right-bold-outline</v-icon>
+                                </v-btn>
+                            </template>
+                            <span>Next Page</span>
+                        </v-tooltip>
                         <v-tooltip bottom v-if="$store.state.playback === true">
                             <template v-slot:activator="{ on, attrs }">
                                 <v-btn fab color="grey darken-3"
-                                       class="mr-1"
+                                       class="mx-1"
                                        @click="desactivePlayback" v-bind="attrs" v-on="on"
                                 >
                                     <v-icon>mdi-speaker</v-icon>
@@ -86,7 +108,7 @@
                         <v-tooltip bottom v-else>
                             <template v-slot:activator="{ on, attrs }">
                                 <v-btn fab color="grey darken-3"
-                                       class="mr-1"
+                                       class="mx-1"
                                        @click="activePlayback" v-bind="attrs" v-on="on"
                                 >
                                     <v-icon>mdi-speaker-off</v-icon>
@@ -119,13 +141,6 @@
                     </v-col>
                 </v-row>
             </v-container>
-            <v-overlay :value="loading" :opacity="0.9">
-                <v-progress-circular
-                        indeterminate
-                        size="200"
-                > Loading
-                </v-progress-circular>
-            </v-overlay>
             <small><i>v{{ NL_version }}</i></small>
         </v-main>
         <v-footer fixed v-if="$store.state.audios.length > 0">
@@ -166,6 +181,20 @@
             </v-col>
         </v-footer>
         <notification-soundboard></notification-soundboard>
+        <v-overlay :value="loading" :opacity="0.9">
+            <v-progress-circular
+                    indeterminate
+                    size="200"
+            > Loading
+            </v-progress-circular>
+        </v-overlay>
+        <v-overlay :value="!$store.state.gotDevices" :opacity="1">
+            <v-progress-circular
+                    indeterminate
+                    size="200"
+            > Loading devices
+            </v-progress-circular>
+        </v-overlay>
     </v-app>
 </div>
 <!-- Neutralino.js client. This file is gitignored,
