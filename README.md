@@ -4,7 +4,7 @@
 
 ## Description
 
-Embedded [Claker](https://claket.netlify.app/) with [Neutralinojs](https://github.com/neutralinojs/neutralinojs)
+Embedded [Claket](https://claket.netlify.app/) with [Neutralinojs](https://github.com/neutralinojs/neutralinojs)
 
 ## Download
 
