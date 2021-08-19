@@ -2,217 +2,72 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link href="fonts/roboto.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
-    <link href="css/vuetify.min.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-    <title>NeutralinoJs</title>
+    <title>Claket</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-<div id="app">
-    <v-app>
-        <v-main>
-            <v-container>
-                <v-row>
-                    <v-col col="12" sm="6">
-                        <v-img src="icons/logo.svg" contain height="200"></v-img>
-                    </v-col>
-                    <v-col col="12" sm="6">
-                        <device-soundboard></device-soundboard>
-                        <v-text-field type="number" outlined label="Page" v-model="page" min="1" max="1000"
-                                      @input="changePage" class="mt-sm-0 mt-n3" :value="page"></v-text-field>
-                        <volume-soundboard class="mt-sm-3 mt-n3"></volume-soundboard>
-
-                    </v-col>
-                </v-row>
-                <v-row class="mt-n8">
-                    <v-col>
-                        <v-btn fab color="grey darken-3"
-                               :disabled="$store.state.audios.length === 0"
-                               class="mr-1"
-                               v-if="$store.state.paused === false"
-                               @click="pauseAll"
-                        >
-                            <v-icon>mdi-pause</v-icon>
-                        </v-btn>
-                        <v-btn fab color="grey darken-3"
-                               :disabled="$store.state.audios.length === 0"
-                               class="mr-1"
-                               v-else
-                               @click="resumeALl"
-                        >
-                            <v-icon>mdi-play</v-icon>
-                        </v-btn>
-                        <v-btn fab color="grey darken-3" :disabled="$store.state.audios.length === 0"
-                               @click="stopAll"
-                               class="mr-1"
-                        >
-                            <v-icon>mdi-stop</v-icon>
-                        </v-btn>
-                        <v-tooltip bottom v-if="$store.state.loop === false">
-                            <template v-slot:activator="{ on, attrs }">
-                                <v-btn fab color="grey darken-3"
-                                       @click="activeLoop" v-bind="attrs" v-on="on"
-                                >
-                                    <v-icon>mdi-sync-off</v-icon>
-                                </v-btn>
-                            </template>
-                            <span>Loop</span>
-                        </v-tooltip>
-                        <v-tooltip bottom v-else>
-                            <template v-slot:activator="{ on, attrs }">
-                                <v-btn fab color="grey darken-3"
-                                       @click="desactiveLoop" v-bind="attrs" v-on="on"
-                                >
-                                    <v-icon>mdi-sync</v-icon>
-                                </v-btn>
-                            </template>
-                            <span>Loop</span>
-                        </v-tooltip>
-                    </v-col>
-                    <v-col class="ml-auto text-right">
-                        <v-tooltip bottom>
-                            <template v-slot:activator="{ on, attrs }">
-                                <v-btn fab color="grey darken-3"
-                                       @click="previousPage" v-bind="attrs" v-on="on"
-                                       :disabled="page === 1"
-                                >
-                                    <v-icon>mdi-arrow-left-bold-outline</v-icon>
-                                </v-btn>
-                            </template>
-                            <span>Previous Page</span>
-                        </v-tooltip>
-                        <v-tooltip bottom>
-                            <template v-slot:activator="{ on, attrs }">
-                                <v-btn fab color="grey darken-3 ml-1"
-                                       @click="nextPage" v-bind="attrs" v-on="on"
-                                       :disabled="page === 1000"
-                                >
-                                    <v-icon>mdi-arrow-right-bold-outline</v-icon>
-                                </v-btn>
-                            </template>
-                            <span>Next Page</span>
-                        </v-tooltip>
-                        <v-tooltip bottom v-if="$store.state.playback === true">
-                            <template v-slot:activator="{ on, attrs }">
-                                <v-btn fab color="grey darken-3"
-                                       class="mx-1"
-                                       @click="desactivePlayback" v-bind="attrs" v-on="on"
-                                >
-                                    <v-icon>mdi-speaker</v-icon>
-                                </v-btn>
-                            </template>
-                            <span>Playback</span>
-                        </v-tooltip>
-                        <v-tooltip bottom v-else>
-                            <template v-slot:activator="{ on, attrs }">
-                                <v-btn fab color="grey darken-3"
-                                       class="mx-1"
-                                       @click="activePlayback" v-bind="attrs" v-on="on"
-                                >
-                                    <v-icon>mdi-speaker-off</v-icon>
-                                </v-btn>
-                            </template>
-                            <span>Playback</span>
-                        </v-tooltip>
-                        <v-tooltip bottom>
-                            <template v-slot:activator="{ on, attrs }">
-                                <v-btn fab color="grey darken-3"
-                                       @click="deletePage" v-bind="attrs" v-on="on"
-                                >
-                                    <v-icon>mdi-delete</v-icon>
-                                </v-btn>
-                            </template>
-                            <span>Reset Page</span>
-                        </v-tooltip>
-                    </v-col>
-                </v-row>
-                <v-row class="mb-10">
-                    <v-col
-                            v-for="i in 24"
-                            :key="i"
-                            cols="6"
-                            sm="4"
-                            md="3"
-                            lg="2"
-                    >
-                        <button-soundboard :index="i"></button-soundboard>
-                    </v-col>
-                </v-row>
-            </v-container>
-            <small><i>v{{ NL_version }}</i></small>
-        </v-main>
-        <v-footer fixed v-if="$store.state.audios.length > 0">
-            <v-col
-                    cols="12"
-            >
-                <v-list outlined style="max-height: 60vh" rounded="xl"
-                        class="overflow-y-auto">
-                    <v-lazy transition="scroll-x-transition">
-                        <v-list-item>
-                            <v-list-item-content>
-                                <v-list-item-title>
-                                    <player-soundboard :audio="$store.state.audios[0]"></player-soundboard>
-                                </v-list-item-title>
-                            </v-list-item-content>
-                            <v-list-item-action v-if="$store.state.audios.length > 1">
-                                <v-btn fab small color="grey darken-3" @click="toggleList">
-                                    <v-icon v-if="!showlist">mdi-chevron-up</v-icon>
-                                    <v-icon v-else>mdi-chevron-down</v-icon>
-                                </v-btn>
-                            </v-list-item-action>
-                        </v-list-item>
-                    </v-lazy>
-                    <v-lazy v-for="(audio, i) in $store.state.audios" :key="i"
-                            v-if="$store.state.audios.length > 1 && showlist"
-                            transition="scroll-x-transition"
-                    >
-                        <v-list-item>
-                            <v-list-item-content>
-                                <v-list-item-title>
-                                    <player-soundboard :audio="audio" v-if="i > 0"></player-soundboard>
-
-                                </v-list-item-title>
-                            </v-list-item-content>
-                        </v-list-item>
-                    </v-lazy>
-                </v-list>
-            </v-col>
-        </v-footer>
-        <notification-soundboard></notification-soundboard>
-        <v-overlay :value="loading" :opacity="0.9">
-            <v-progress-circular
-                    indeterminate
-                    size="200"
-            > Loading
-            </v-progress-circular>
-        </v-overlay>
-        <v-overlay :value="!$store.state.gotDevices" :opacity="1">
-            <v-progress-circular
-                    indeterminate
-                    size="200"
-            > Loading devices
-            </v-progress-circular>
-        </v-overlay>
-    </v-app>
-</div>
-<!-- Neutralino.js client. This file is gitignored,
-    because `neu update` typically downloads it.
-    Avoid copy-pasting it.
-    -->
+<pre>
+VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV*******V**********************VFFFFFVVVVVVVVVVVVVVVVVVVVVVVVV*
+VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV********************************VVVVVVVVVVVVVVVVVVVVVVVVVVVFFV
+VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV**********************************VVVVVV**VVVVFFFFMMFFVVVVV***
+VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV************************************VFFFFFFMMMFFVVVV**VV**VFFMV
+VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV************************************VFVVVVVVVVVFFFMMMMMFFMFFFV
+VVVVVVVVVVVVVVVVVVVVVVFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV**************************************VFMMMMMMMMMMMMMMMMMMMMMV
+VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV**************************************VFFFFFMMMNMMMMMMMMMMMMV
+VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV***************************************VMNNNNMMMMMMMMMMMMMMMV
+VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV*****************************************MNMMMMMMMMMMMMMMMMMV
+VVVVVVVVVVVVVVVVV******VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV*****************************************VMNMMMMMMMMMMMMMMMMV
+VV**********VVVVVVVV**VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV*******************************************VNNMMMMMMMMMMMMMMMV
+**********VVVVVV******VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV***********************************::*:::***MNMMMMMMMMMMMMMMMV
+*************VVVVFFMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV*******************************::::::::::**VMMMMMMMMMMMMMMMMV
+***VFVVFFFMMMMMMMMNMVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV*******************************::::::::::::*MMMMMMMMMMMMMMMMF
+MMMMMMMMMMMMMMMMMMMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV***************************************:::::::*FMMMMMMMMMMMMMMMF
+MMMMMMMMMMMMMMMMMNFVVVVFFVVVVVVVVVVVVVVVVVVVVVVVVVV********************************************::::*VMMMMMMMMMMMMMMMF
+MMMMMMNNNNMMMMMNNMVVVVFFFFVVVVVVVVVVVVVVVVVVVVVVV****************:::****************************:::**MMMMMMMMMMMMMMMF
+MMMMMMNNNMFVVVVVMV**VVVFFVVVFFVVVVVVVVVVVVVVVVVVVVVV**************:::::::****::::***************::::*MMMMMMMMMMMMMMMF
+MMMMMMMNMV*VVVV*****VVVVVVVVFFFVVVVVVVVVVVVVVFFVVVV*****************:::::::::::::**:**********::::::*MMMMMMMMMMMMMMMF
+MMMMMMMMF**VVFFV***VVVVVVVVVFFFFVVVVVVVVVVVVFFFVVV*******::::::********::::::::::*:::**:****::::::::*MMMMMMMMMMMMMMMF
+MMMMMMMMV*:*FFFVVVVVVVVVVVVVVVFFFVVVVVVVVVVVFVVV***:::********::::::::***:::::::::::**::::::::::::::VMMMMMMMMMMMMMMMF
+MMMMMMMF**:*FVVVVFVVVFVVVVVVVVVVFFVVVVVVFVVVVV***::***V*********::::.::::***:::::::**:::::::::::::::VMMMMMMMMMMMMMMMF
+MMMMMMMM***VFVVVVFVFFFVFFFVVVVVVFVVVVVVVVVVV****:::*****:::::::::::::..:::****:::****::::::::::::::*FMMMMMMMMMMMMMMMF
+MMMMMMMMV*VVVV***VVFFFFFFFFVVVVVFVVVVVVVVV*******:****FV*:....::::::::..:::*******V**::::::::::::::*VFFFFFFFFFFVVVVV*
+MMMMMMMMFV****::*VVFFFFFFFFFVVFFFVVVVVVVV**********VVVVV*:::.::::::::::::::**V**VV**::...:::::::::::****************:
+MMMMMMMMF**:::::*VVFFFFFFFFFFFFFFFVVVVVVVV*********VVV****::::::::::.::::::*VVVVV**::...........:::::::::::::......:.
+MMMMMMMMFV***::*VVVFFFFFFFFFFFFFFVVVVVVVV******************::::::::::::::***VVVV***::............::..................
+MMMMMMMMFVVVV****VVFFFFFFFFFFFFFFFVVVVVV*******************::::::::::::*****VVVVV***:.........::::...................
+MMMMFFFFFVVFFV***FFFFFFFVVVVVVVFFFVVVVV*********************:::::::******VVVVVVVV***:...........::...................
+*********VVFFFFVVFFFFFFVVVVVVVVVFVVVVVV********************:::::*********VVVVVVVVV**::::.............................
+.........:VFFFFVVVFFFFFVVVVVVVVFFFFFVVV**********************************VVVVVVVVV***:::::::::::.....................
+....::::::*VFFFFVVVFFFFFVVVVVVVFFFFFFVV*********************************VVVVVVVVVV***:::::::::::.....................
+...:*FMV****VFFFV**FFFVVVVVVVVVVFFFFVV********************************VVVVVVVVVVVV***:::::::::::.....................
+...:*FMFV**::*VVVVVFFVVVVVVVVVVVVVVVVV*****************************VVVVVFFFFFVVVVV***:::::::::::.....................
+....:*F**V**:*VVVVVVVVVVVVVVVVVVVVVVV*****************************VVVVFFFFFFFVVVVV****::::::::::.....................
+....:*V**V**:VVVVVVVVVVVVVVVVVVVVVVVV****************************VVVVVVVVVFFFVVVVV****::::::::::.....................
+....::V*:****VVVVVVVVVVVVVVFFFFFFFVVV****************************VVVVVVVVVVVFVVVVV****:::::::::......................
+....::VV****VVVVVVVVVVVVVVVFFFFFFFVVVV**************************VVVFFVVVVVVVVVVVVV******::::::.......................
+.....:*V****VVVVVVVVVVVVFFFFFFFFFFVVVVV**********VVVVVVVV*******VFFFFVVVVVVVVVVV********:::::........................
+.....:*F****VVVVVVVVVVVFFFFFFFFFFFFVVVVVVVV****VVVVVVVVVVVVV****VFFFVVV**VVVVVV*****::::::::.........................
+.....*VF**::VVVVVVVVVVVFFFFFFFFFFFVVVVVVVVVVVVVVVVVVVVVVVVVV*****VV**:::::**VV****:::::::::..........................
+.....*V**:::VVVVVVVVVVVVFFFFFFFFFFVVVVVVVVVVVVVVVVVVVVVVVVVVV******:::*******VV**:::::::::...........................
+.....*V**:::VVVVVVVVVVVVFFFFFFFFFVVVVVVVFFFFVVVVVFFFFVVVVVVV******::::*****::**::::::::::............................
+....::V**::*VVVVVVVVVVVVFFFFFFFFFVVVVVVFFFFFVVVFFFFFVVVVVVV*********::::**::::::::::::::.............................
+:*****F*V**VVFFFVVVVVVVVFFFFFFFFFVVVVVVFFFFVVVFFFFFVVVVV************::::::::::..:::::::..............................
+******VVVVVVVFFFVVVVVVVVVFFFFFFFFVVVVVFFFFFFFFFFFFFVVVV*************::::::::::.::::::::..............................
+**VVVVVVVVVVVVFVVVVVVVVVVFFFFFFFVVVVVVFFFFFFFFFFFVFVV***************:::::::::::::::::::..............................
+VVVVVVVVVVVVVVVVVVVVVVVVVVFFFFFVVVVVVFFFFFFFFFVVVVV**************:::::::::::::::::::::...............................
+VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVFFFFFFFFFVV******::::::::::::::::::::::::.....::*:...............................
+FFFFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVFFFFFFFFVV*************::::::::::::.::::.....:::*:...............................
+MFFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVFFFFFFFVV********************:::::::::::::::::*VV*...............................
+FVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVFFFFFFFV********VV*************:::::::::::::::****:..............................
+VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVFFFVFVV********VV*********::::::::...::::::::*****::::..........................
+VVVVVVVVVVVVVVVVVVVVV**VVVVVVVVVVVVVVVVVVVVV*******************::::::::::::::::::::*******::::.......................
+VVVVVVVVVVVVVVVVVVVVV**VVV*********VVVVVVVVVV*******************::::::::::::::::::::**:****:**:::....................
+VV**VVVVVVVVVVVVVVVVVV**V*************VVVVVVVV********************:::::::::::::::::::*:::***:*:::::..................
+****VVVVVVVVVVVVVVVVVVV****************VVVVVVVVV*******VVV********:::::::::::::::::::**::***::::::::::...............
+****VVVVVVVVVVVVVVVVVVV**************V****VVVVVVVV*****VV********:::::::::::::::::::.:**:***:::::::***::::...........
+******VVVVVVVVVVVVVVVV***********************VVVV*************::::::::::::::::::::::.:******::::::**:*::::::::::.....
+</pre>
 <script src="js/neutralino.js"></script>
-<!-- Your app's source files -->
-<script src="js/vue.min.js"></script>
-<script src="js/vuex.min.js"></script>
-<script src="js/vuetify.min.js"></script>
-<script src="js/main.js"></script>
-<script src="js/store.js"></script>
-<script src="js/components/device.js"></script>
-<script src="js/components/bouton.js"></script>
-<script src="js/components/volume.js"></script>
-<script src="js/components/player.js"></script>
-<script src="js/components/notification.js"></script>
-<script src="js/app.js"></script>
 </body>
 </html>
